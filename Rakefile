@@ -55,37 +55,31 @@ irb = proc do |env|
 end
 
 desc "Open irb shell in test mode"
-task :test_irb do 
+task :test_irb do
   irb.call('test')
 end
 
 desc "Open irb shell in development mode"
-task :dev_irb do 
+task :dev_irb do
   irb.call('development')
 end
 
 desc "Open irb shell in production mode"
-task :prod_irb do 
+task :prod_irb do
   irb.call('production')
 end
 
 # Specs
+desc "Run all tests"
+task :default => [:test]
 
-spec = proc do |pattern|
-  sh "#{FileUtils::RUBY} -e 'ARGV.each{|f| require f}' #{pattern}"
-end
+require "rake/testtask"
 
-desc "Run all specs"
-task :default => [:model_spec, :web_spec]
-
-desc "Run model specs"
-task :model_spec do
-  spec.call('./spec/model/*_spec.rb')
-end
-
-desc "Run web specs"
-task :web_spec do
-  spec.call('./spec/web/*_spec.rb')
+Rake::TestTask.new(:test) do |test|
+  $verbose = nil
+  test.libs << 'test'
+  test.test_files = FileList['test/**/*_test.rb']
+  test.verbose = nil
 end
 
 last_line = __LINE__
@@ -98,8 +92,8 @@ task :setup, [:name] do |t, args|
     exit(1)
   end
 
-  require 'securerandom'
-  File.write('.session_secret', SecureRandom.random_bytes(40))
+  # require 'securerandom'
+  # File.write('.session_secret', SecureRandom.random_bytes(40))
 
   lower_name = name.gsub(/([a-z\d])([A-Z])/, '\1_\2').downcase
   File.write('.env.rb', <<END)
@@ -115,7 +109,7 @@ else
 end
 END
 
-  %w'views/layout.erb routes/prefix1.rb config.ru app.rb'.each do |f|
+  %w'routes/prefix1.rb config.ru app.rb'.each do |f|
     File.write(f, File.read(f).gsub('App', name))
   end
 

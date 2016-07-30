@@ -10,3 +10,4 @@ Unreloader = Rack::Unreloader.new(:subclasses=>%w'Roda Sequel::Model', :logger=>
 require_relative 'models'
 Unreloader.require('app.rb'){'App'}
 run(dev ? Unreloader : App.freeze.app)
+
